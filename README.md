@@ -13,8 +13,8 @@ Application web développée avec Symfony 6.4 permettant de gérer une biblioth�
 
 1. Cloner le projet
 ```bash
-git clone []
-cd [nom-du-projet]
+git clone [https://github.com/Emeric-Millot/TP_Biblio.git]
+cd [Tp_Biblio] ->(c'est le nom du projet)
 ```
 
 2. Installer les dépendances PHP
