@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Utilisateurs{% endblock %}
+
+{% block body %}
+    {% if is_granted('ROLE_ADMIN') %}
+        <div class="container mt-4">
+            <h1>Gestion des Utilisateurs</h1>
+
+            {# Afficher les messages flash s'il y en a #}
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            {# Formulaire d'ajout d'utilisateur #}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h2>Ajouter un nouvel utilisateur</h2>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                        <div class="mb-3">
+                            {{ form_row(form.email, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_row(form.password, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_row(form.roles, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">Ajouter l'utilisateur</button>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+
+            {# Liste des utilisateurs existants #}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h2>Liste des utilisateurs</h2>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Rôles</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.roles|join(', ') }}</td>
+                                    <td>
+                                        <a href="{{ path('admin_user_edit', {'id': user.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                                        <a href="{{ path('admin_user_delete', {'id': user.id}) }}" class="btn btn-sm btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')">Supprimer</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-danger">
+            Accès refusé. Vous devez être administrateur pour accéder à cette page.
+        </div>
+    {% endif %}
+{% endblock %}

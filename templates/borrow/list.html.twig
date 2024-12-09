@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des emprunts{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1 class="mb-4">Liste des emprunts</h1>
+
+        {# Affichage des messages flash #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {% if borrows|length > 0 %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Livre</th>
+                            <th scope="col">Emprunteur</th>
+                            <th scope="col">Date d'emprunt</th>
+                            <th scope="col">Statut</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for borrow in borrows %}
+                            <tr>
+                                <td>{{ borrow.books.title }}</td>
+                                <td>{{ borrow.user.email }}</td>
+                                <td>{{ borrow.borrowDate|date('d/m/Y') }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if borrow.status == 'en cours' %}bg-warning
+                                        {% else %}bg-success
+                                        {% endif %}">
+                                        {{ borrow.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {# Action de retour de livre, accessible à l'emprunteur ou à l'admin #}
+                                    {% if borrow.status == 'en cours' and (is_granted('ROLE_ADMIN') or app.user == borrow.user) %}
+                                        <form action="{{ path('app_borrow_return', {'id': borrow.id}) }}" method="POST" style="display:inline-block;">
+                                            <button type="submit" class="btn btn-success btn-sm">Retourner</button>
+                                        </form>
+                                    {% endif %}
+
+                                    {# Action de suppression, accessible uniquement aux admins #}
+                                    {% if is_granted('ROLE_ADMIN') %}
+                                        <form action="{{ path('app_borrow_delete', {'id': borrow.id}) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet emprunt ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ borrow.id) }}">
+                                            <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                Aucun emprunt n'a été enregistré pour le moment.
+            </div>
+        {% endif %}
+
+        <div class="mt-4">
+            <a href="{{ path('app_book_index') }}" class="btn btn-primary">Voir les livres disponibles</a>
+        </div>
+    </div>
+{% endblock %}

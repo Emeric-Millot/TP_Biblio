@@ -1,0 +1,69 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <h1 class="mb-4">Liste des Emprunts</h1>
+
+        {# Affichage des messages flash #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {# Vérification de la présence de la variable 'borrows' et de son contenu #}
+        {% if borrows is defined and borrows|length > 0 %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Livre</th>
+                            <th>Emprunteur</th>
+                            <th>Date d'emprunt</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for borrow in borrows %}
+                            <tr>
+                                <td>{{ borrow.books.title }}</td>
+                                <td>{{ borrow.user.email }}</td>
+                                <td>{{ borrow.borrowDate|date('d/m/Y') }}</td>
+                                <td>
+                                    <span class="badge {% if borrow.status == 'en cours' %}bg-warning{% else %}bg-success{% endif %}">
+                                        {{ borrow.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if borrow.status == 'en cours' and (is_granted('ROLE_ADMIN') or app.user == borrow.user) %}
+                                        <form method="POST" action="{{ path('app_borrow_return', {'id': borrow.id}) }}" class="d-inline">
+                                            <button type="submit" class="btn btn-success btn-sm">Retourner</button>
+                                        </form>
+                                    {% endif %}
+
+                                    {% if is_granted('ROLE_ADMIN') %}
+                                        <form method="POST" action="{{ path('app_borrow_delete', {'id': borrow.id}) }}" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet emprunt ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ borrow.id) }}">
+                                            <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Aucun emprunt n'a été enregistré pour le moment.
+            </div>
+        {% endif %}
+
+        <div class="mt-3">
+            <a href="{{ path('app_book_index') }}" class="btn btn-primary">Voir les livres disponibles</a>
+        </div>
+    </div>
+{% endblock %}
