@@ -73,6 +73,7 @@ class BorrowController extends AbstractController
         return $this->redirectToRoute('app_borrow_list');
     }
 
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/borrow/{id}/return', name: 'app_borrow_return', methods: ['POST'])]
     public function returnBook(
         Borrow $borrow,
